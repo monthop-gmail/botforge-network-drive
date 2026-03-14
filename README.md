@@ -117,10 +117,6 @@ python mcp_server.py  # เปิด HTTP server ที่ port 3002
 | `drive_get_file_info` | ดูข้อมูลรายละเอียดไฟล์ |
 | `drive_search` | ค้นหาไฟล์ตาม pattern |
 
-## Examples
-
-ดูตัวอย่างเพิ่มเติมใน [examples/](./examples/)
-
 ## License
 
 MIT

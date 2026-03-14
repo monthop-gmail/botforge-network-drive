@@ -127,6 +127,44 @@ connections:
     password: "${NAS_PASSWORD}"
 ```
 
+## MCP Server (AI Agent Integration)
+
+รองรับ MCP Protocol ผ่าน **Streamable HTTP transport** ให้ AI agent เรียกใช้ network drive ได้โดยตรง
+
+### รัน MCP Server
+
+```bash
+python mcp_server.py  # เปิด HTTP server ที่ port 3002
+```
+
+### ตั้งค่าฝั่ง AI Agent
+
+```json
+{
+  "mcpServers": {
+    "network-drive": {
+      "url": "http://localhost:3002/mcp"
+    }
+  }
+}
+```
+
+### MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `drive_add_connection` | เพิ่ม SMB connection ใหม่ |
+| `drive_remove_connection` | ลบ connection |
+| `drive_list_connections` | แสดงรายการ connections ทั้งหมด |
+| `drive_list_files` | ดูรายการไฟล์ในโฟลเดอร์ |
+| `drive_read_file` | อ่านไฟล์ (text/base64) |
+| `drive_write_file` | เขียนไฟล์ (text/base64) |
+| `drive_delete_file` | ลบไฟล์ |
+| `drive_create_folder` | สร้างโฟลเดอร์ใหม่ |
+| `drive_delete_folder` | ลบโฟลเดอร์ |
+| `drive_get_file_info` | ดูข้อมูลรายละเอียดไฟล์ |
+| `drive_search` | ค้นหาไฟล์ตาม pattern |
+
 ## Examples
 
 ดูตัวอย่างเพิ่มเติมใน [examples/](./examples/)

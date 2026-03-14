@@ -49,29 +49,6 @@ drive.write_file("office-server", "/documents/new.txt", b"Hello World")
 results = drive.search("office-server", "*.pdf", "/documents")
 ```
 
-## Usage with LINE Bot
-
-```python
-from plugin import NetworkDrivePlugin
-
-drive = NetworkDrivePlugin(bot=line_bot_api)
-
-@drive.register("list")
-def handle_list(user_id, params):
-    path = params.get("path", "/")
-    files = drive.list_files("office-server", path)
-    return "\n".join([f['filename'] for f in files])
-
-@drive.register("download")
-def handle_download(user_id, params):
-    file_path = params.get("file")
-    content = drive.read_file("office-server", file_path)
-    return f"Downloaded {len(content)} bytes"
-
-# เรียกใช้ command
-result = drive.execute_command("list", user_id, {"path": "/documents"})
-```
-
 ## Supported Protocols
 
 - SMBv1/CIFS, SMBv2, SMBv3

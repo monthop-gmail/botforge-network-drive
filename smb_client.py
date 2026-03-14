@@ -40,7 +40,8 @@ class SMBClient:
                 self.username,
                 self.password,
                 self.client_name,
-                self.domain,
+                self.server,
+                domain=self.domain,
                 use_ntlm_v2=self.use_ntlm_v2,
                 is_direct_tcp=self.is_direct_tcp
             )
@@ -110,11 +111,12 @@ class SMBClient:
                     tmp_path = tmp.name
                 
                 try:
-                    self.connection.retrieveFile(
-                        self.share,
-                        remote_path,
-                        open(tmp_path, "wb")
-                    )
+                    with open(tmp_path, "wb") as wf:
+                        self.connection.retrieveFile(
+                            self.share,
+                            remote_path,
+                            wf
+                        )
                     with open(tmp_path, "rb") as f:
                         content = f.read()
                     return content

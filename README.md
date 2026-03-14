@@ -4,24 +4,25 @@ SMB/Network Drive plugin สำหรับ BotForge - เข้าถึง sha
 
 ## Features
 
-- ✅ เชื่อมต่อ SMB/CIFS shares
-- ✅ อ่าน/เขียนไฟล์บน network drive
-- ✅ ดูรายการไฟล์และโฟลเดอร์
-- ✅ ค้นหาไฟล์
-- ✅ Upload/Download ไฟล์
-- ✅ Progress tracking สำหรับไฟล์ใหญ่
-- ✅ รองรับ multiple connections
+- เชื่อมต่อ SMB/CIFS shares
+- อ่าน/เขียนไฟล์บน network drive
+- ดูรายการไฟล์และโฟลเดอร์
+- ค้นหาไฟล์
+- Upload/Download ไฟล์
+- รองรับ multiple connections
 
 ## Installation
 
 ```bash
-pip install botforge-network-drive
+git clone https://github.com/monthop-gmail/botforge-network-drive.git
+cd botforge-network-drive
+pip install -r requirements.txt
 ```
 
 ## Quick Start
 
 ```python
-from botforge_network_drive import NetworkDrivePlugin
+from plugin import NetworkDrivePlugin
 
 # Initialize
 drive = NetworkDrivePlugin()
@@ -41,8 +42,8 @@ files = drive.list_files("office-server", "/documents")
 # อ่านไฟล์
 content = drive.read_file("office-server", "/documents/report.pdf")
 
-# เขียนไฟล์
-drive.write_file("office-server", "/documents/new.txt", "Hello World")
+# เขียนไฟล์ (รับ bytes)
+drive.write_file("office-server", "/documents/new.txt", b"Hello World")
 
 # ค้นหาไฟล์
 results = drive.search("office-server", "*.pdf", "/documents")
@@ -51,81 +52,55 @@ results = drive.search("office-server", "*.pdf", "/documents")
 ## Usage with LINE Bot
 
 ```python
-from botforge_network_drive import NetworkDrivePlugin
+from plugin import NetworkDrivePlugin
 
-drive = NetworkDrivePlugin(bot)
+drive = NetworkDrivePlugin(bot=line_bot_api)
 
-@drive.command("list")
+@drive.register("list")
 def handle_list(user_id, params):
-    """List files in directory"""
     path = params.get("path", "/")
     files = drive.list_files("office-server", path)
-    return format_file_list(files)
+    return "\n".join([f['filename'] for f in files])
 
-@drive.command("download")
+@drive.register("download")
 def handle_download(user_id, params):
-    """Download file from network drive"""
     file_path = params.get("file")
     content = drive.read_file("office-server", file_path)
-    return send_file_to_user(user_id, content)
+    return f"Downloaded {len(content)} bytes"
 
-@drive.command("upload")
-def handle_upload(user_id, params):
-    """Upload file to network drive"""
-    file_data = params.get("file")
-    dest_path = params.get("path")
-    drive.write_file("office-server", dest_path, file_data)
-    return "✅ อัพโหลดเสร็จแล้ว"
+# เรียกใช้ command
+result = drive.execute_command("list", user_id, {"path": "/documents"})
 ```
 
 ## Supported Protocols
 
-- SMBv1/CIFS
-- SMBv2
-- SMBv3
+- SMBv1/CIFS, SMBv2, SMBv3
 - Windows Shared Folders
 - Samba Shares
 
 ## Security
 
-- ✅ NTLM authentication
-- ✅ NTLMv2 authentication
-- ✅ SMB Encryption
-- ✅ Credential storage (encrypted)
-- ✅ Access control lists
+- NTLM / NTLMv2 authentication
+- SMB Encryption (via pysmb)
 
 ## API Reference
 
-### NetworkDrivePlugin
-
 | Method | Description |
 |--------|-------------|
-| `add_connection(name, server, share, ...)` | เพิ่ม connection ใหม่ |
+| `add_connection(name, server, share, username, password, **kwargs)` | เพิ่ม connection ใหม่ |
+| `remove_connection(name)` | ลบ connection |
+| `list_connections()` | ดูรายการ connections ทั้งหมด |
 | `list_files(connection, path)` | ดูรายการไฟล์ในโฟลเดอร์ |
-| `read_file(connection, path)` | อ่านไฟล์ |
-| `write_file(connection, path, content)` | เขียนไฟล์ |
+| `read_file(connection, path)` | อ่านไฟล์ (คืน bytes) |
+| `write_file(connection, path, content)` | เขียนไฟล์ (รับ bytes) |
 | `delete_file(connection, path)` | ลบไฟล์ |
-| `create_folder(connection, path)` | สร้างโฟลเดอร์ใหม่ |
-| `search(connection, pattern, path)` | ค้นหาไฟล์ |
-| `get_file_info(connection, path)` | ข้อมูลไฟล์ (size, modified, etc.) |
-
-## Configuration
-
-```yaml
-connections:
-  - name: "office-server"
-    server: "192.168.1.100"
-    share: "SharedFolder"
-    username: "user"
-    password: "${ENV_VAR}"
-    domain: "WORKGROUP"
-    
-  - name: "nas-drive"
-    server: "nas.local"
-    share: "Public"
-    username: "admin"
-    password: "${NAS_PASSWORD}"
-```
+| `create_folder(connection, path)` | สร้างโฟลเดอร์ |
+| `delete_folder(connection, path)` | ลบโฟลเดอร์ |
+| `search(connection, pattern, path)` | ค้นหาไฟล์ตาม pattern |
+| `get_file_info(connection, path)` | ดูข้อมูลไฟล์ |
+| `disconnect(name)` | ตัดการเชื่อมต่อ |
+| `register(name)` | Decorator สำหรับ register command handler |
+| `execute_command(command, user_id, params)` | เรียกใช้ registered command |
 
 ## MCP Server (AI Agent Integration)
 

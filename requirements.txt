@@ -1,0 +1,2 @@
+pysmb>=1.2.0
+smbprotocol>=1.9.0
